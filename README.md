@@ -9,14 +9,14 @@ C++ client-side program to interact with FTX.com api and populate MongoDB databa
 
 ## To Start with crypto_ds
 
-1. **Set up required Dependencies**
+**1. Set up required Dependencies**
 
 **Required Dependencies:**
 - Curl & libcurl library
 - [rapidjson](https://rapidjson.org/)
 - Mongodb
 
-2. **Compile using CMake, and Run**
+**2. Compile using CMake, and Run**
 Save the key and secret of FTX.com api in a two line file.
 ```
 // Inside ftx_key.txt
