@@ -25,9 +25,6 @@ namespace encoding {
         hmac.ctx, secret.data(), (int)secret.size(), EVP_sha256(), nullptr);
         HMAC_Update(hmac.ctx, (unsigned char*)msg.data(), msg.size());
         HMAC_Final(hmac.ctx, (unsigned char*)signed_msg, nullptr);
-        //std::cout << signed_msg << std::endl;
-        //std::cout << signed_len << std::endl;
-        //std::cout << secret << std::endl;
 
         return {signed_msg, signed_len};
     }
