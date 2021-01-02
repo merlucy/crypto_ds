@@ -12,12 +12,18 @@
 #include <chrono>
 #include "client.h"
 
+#define H1 "FTX-KEY: "
+#define H2 "FTX-TS: "
+#define H3 "FTX-SIGN: "
+
 using namespace std;
 using namespace rapidjson;
 
 size_t Client::to_json(void * data, size_t size, size_t nmemb, void * doc)
 {
     size_t realsize = size*nmemb;
+
+    cout << (char *)data << endl;
     Document *d = (Document *)doc;
 
     d->Parse((char *)data);
@@ -41,17 +47,13 @@ struct curl_slist* Client::set_header(struct curl_slist * slist, string path){
     long p1 = chrono::duration_cast<chrono::milliseconds>(ts.time_since_epoch()).count();
     string time_in_string = to_string(p1);
     
-    string h1 = "FTX-KEY: ";
-    string h2 = "FTX-TS: ";
-    string h3 = "FTX-SIGN: ";
-
     string data = time_in_string + "GET" + path;
     string hmacced = encoding::hmac(this->secret, data, 32);
     string sign = encoding::string_to_hex((unsigned char*)hmacced.c_str(), 32);
 
-    slist = curl_slist_append(slist, (h1 + this->key).c_str());
-    slist = curl_slist_append(slist, (h2 + time_in_string).c_str());
-    slist = curl_slist_append(slist, (h3 + sign).c_str());
+    slist = curl_slist_append(slist, (H1 + this->key).c_str());
+    slist = curl_slist_append(slist, (H2 + time_in_string).c_str());
+    slist = curl_slist_append(slist, (H3 + sign).c_str());
 
     return slist;
 }
@@ -60,6 +62,76 @@ Document Client::get_account(){
 
     string path = "/api/account";
     string url = endpoint_append(path);
+
+    struct curl_slist *slist = NULL;
+    slist = set_header(slist, path);
+    
+    Document result = send_request(url, slist);
+    
+    return result;
+}
+
+// Get single market data. FTX does not require authentication
+Document Client::get_single_market(string market){
+
+    string path = "/api/markets/" + market;
+    string url = endpoint_append(path);
+
+    struct curl_slist *slist = NULL;
+
+    //slist = set_header(slist, path);
+    
+    Document result = send_request(url, slist);
+    
+    return result;
+}
+
+// Get single market orderbook. FTX does not require authentication
+Document Client::get_single_orderbook(string market, string depth){
+
+    string path = "/api/markets/" + market + "/orderbook?depth=" + depth;
+    string url = endpoint_append(path);
+
+    struct curl_slist *slist = NULL;
+    //slist = set_header(slist, path);
+    
+    Document result = send_request(url, slist);
+    
+    return result;
+}
+
+Document Client::get_trades(string market, string limit){
+
+    string path = "/api/markets/" + market + "/trades?limit=" + limit;
+    string url = endpoint_append(path);
+
+    struct curl_slist *slist = NULL;
+    slist = set_header(slist, path);
+    
+    Document result = send_request(url, slist);
+    
+    return result;
+}
+
+Document Client::get_hist_specified(string market, string resolution, string limit, string start_time, string end_time){
+
+    string path = "/api/markets/" + market + "/candles?resolution=" + resolution 
+        + "&limit=" + limit + "&start_time=" + start_time + "&end_time=" + end_time;
+    string url = endpoint_append(path);
+
+    struct curl_slist *slist = NULL;
+    //slist = set_header(slist, path);
+    
+    Document result = send_request(url, slist);
+    
+    return result;
+}
+
+Document Client::get_hist_recent(string market, string resolution, string limit){
+
+    string path = "/api/markets/" + market + "/candles?resolution=" + resolution + "&limit=" + limit;
+    string url = endpoint_append(path);
+    cout << url << endl;
 
     struct curl_slist *slist = NULL;
     slist = set_header(slist, path);
@@ -99,6 +171,5 @@ Document Client::send_request(string url, struct curl_slist * slist){
 
         return json;
     }
-
     return NULL;
 }

@@ -20,6 +20,12 @@ class Client{
         };
 
         rapidjson::Document get_account();
+        rapidjson::Document get_single_market(std::string market);
+        rapidjson::Document get_single_orderbook(std::string market, std::string depth);
+        rapidjson::Document get_trades(std::string market, std::string limit);
+        rapidjson::Document get_hist_specified(std::string market, std::string resolution, std::string limit, std::string start_time, std::string end_time);
+        rapidjson::Document get_hist_recent(std::string market, std::string resolution, std::string limit);
+
         static size_t to_json(void * data, size_t size, size_t nmemb, void * doc);
 
     private:
