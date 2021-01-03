@@ -19,20 +19,27 @@
 using namespace std;
 using namespace rapidjson;
 
-size_t Client::to_json(void * data, size_t size, size_t nmemb, void * doc)
+// To prevent parse errors due to partial responses, maintain a in-memory structure that
+// changes in size. Parsing to json will be done after the full response has been received.
+// Reference 1: https://curl.se/libcurl/c/getinmemory.html
+// Reference 2: https://stackoverflow.com/questions/12903587/handling-http-responses-from-libcurl-over-multiple-callbacks
+size_t Client::write_response(void * data, size_t size, size_t nmemb, void * userp)
 {
-    size_t realsize = size*nmemb;
-
-    cout << (char *)data << endl;
-    Document *d = (Document *)doc;
-
-    d->Parse((char *)data);
-
-    StringBuffer buffer;
-    Writer<StringBuffer> writer(buffer);
-    d->Accept(writer);
-    cout << buffer.GetString() << endl;
-
+    size_t realsize = size * nmemb;
+    mem_struct *mem = (mem_struct *)userp;
+    
+    char *ptr = (char *)realloc(mem->memory, mem->size + realsize + 1);
+    if(ptr == NULL) {
+        /* out of memory! */ 
+        printf("not enough memory (realloc returned NULL)\n");
+        return 0;
+    }
+    
+    mem->memory = ptr;
+    memcpy(&(mem->memory[mem->size]), data, realsize);
+    mem->size += realsize;
+    mem->memory[mem->size] = 0;
+    
     return realsize;
 }
 
@@ -58,7 +65,7 @@ struct curl_slist* Client::set_header(struct curl_slist * slist, string path){
     return slist;
 }
 
-Document Client::get_account(){
+Document* Client::get_account(){
 
     string path = "/api/account";
     string url = endpoint_append(path);
@@ -66,41 +73,38 @@ Document Client::get_account(){
     struct curl_slist *slist = NULL;
     slist = set_header(slist, path);
     
-    Document result = send_request(url, slist);
+    Document* result = send_request(url, slist);
     
     return result;
 }
 
 // Get single market data. FTX does not require authentication
-Document Client::get_single_market(string market){
+Document* Client::get_single_market(string market){
 
     string path = "/api/markets/" + market;
     string url = endpoint_append(path);
 
     struct curl_slist *slist = NULL;
-
-    //slist = set_header(slist, path);
     
-    Document result = send_request(url, slist);
+    Document* result = send_request(url, slist);
     
     return result;
 }
 
 // Get single market orderbook. FTX does not require authentication
-Document Client::get_single_orderbook(string market, string depth){
+Document* Client::get_single_orderbook(string market, string depth){
 
     string path = "/api/markets/" + market + "/orderbook?depth=" + depth;
     string url = endpoint_append(path);
 
     struct curl_slist *slist = NULL;
-    //slist = set_header(slist, path);
     
-    Document result = send_request(url, slist);
+    Document* result = send_request(url, slist);
     
     return result;
 }
 
-Document Client::get_trades(string market, string limit){
+Document* Client::get_trades(string market, string limit){
 
     string path = "/api/markets/" + market + "/trades?limit=" + limit;
     string url = endpoint_append(path);
@@ -108,26 +112,25 @@ Document Client::get_trades(string market, string limit){
     struct curl_slist *slist = NULL;
     slist = set_header(slist, path);
     
-    Document result = send_request(url, slist);
+    Document* result = send_request(url, slist);
     
     return result;
 }
 
-Document Client::get_hist_specified(string market, string resolution, string limit, string start_time, string end_time){
+Document* Client::get_hist_specified(string market, string resolution, string limit, string start_time, string end_time){
 
     string path = "/api/markets/" + market + "/candles?resolution=" + resolution 
         + "&limit=" + limit + "&start_time=" + start_time + "&end_time=" + end_time;
     string url = endpoint_append(path);
 
     struct curl_slist *slist = NULL;
-    //slist = set_header(slist, path);
     
-    Document result = send_request(url, slist);
+    Document* result = send_request(url, slist);
     
     return result;
 }
 
-Document Client::get_hist_recent(string market, string resolution, string limit){
+Document* Client::get_hist_recent(string market, string resolution, string limit){
 
     string path = "/api/markets/" + market + "/candles?resolution=" + resolution + "&limit=" + limit;
     string url = endpoint_append(path);
@@ -136,29 +139,43 @@ Document Client::get_hist_recent(string market, string resolution, string limit)
     struct curl_slist *slist = NULL;
     slist = set_header(slist, path);
     
-    Document result = send_request(url, slist);
+    Document* result = send_request(url, slist);
     
     return result;
 }
 
-Document Client::send_request(string url, struct curl_slist * slist){
+Document* Client::send_request(string url, struct curl_slist * slist){
 
     CURL *curl;
     CURLcode res;
-    
+
+    mem_struct mem;
+    mem.memory = (char *)malloc(1);     /* will be grown as needed by the realloc above */ 
+    mem.size = 0;                       /* no data at this point */ 
+
     curl = curl_easy_init();
     if(curl) {
 
         curl_easy_setopt(curl, CURLOPT_URL, url.c_str());
         curl_easy_setopt(curl, CURLOPT_HTTPHEADER, slist);
 
-        Document json;
+        Document* json = new Document();
 
-        curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, to_json);
-        curl_easy_setopt(curl, CURLOPT_WRITEDATA, (void *)&json);
+        curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, write_response);
+        curl_easy_setopt(curl, CURLOPT_WRITEDATA, (void *)&mem);
     
         /* Perform the request, res will get the return code */ 
         res = curl_easy_perform(curl);
+
+        if(json->Parse((char *)mem.memory).HasParseError()){
+            cout << "Parse Error" << endl;
+            return NULL;
+        };
+
+        StringBuffer buffer;
+        Writer<StringBuffer> writer(buffer);
+        json->Accept(writer);
+        cout << buffer.GetString() << endl;
 
         /* Check for errors */ 
         if(res != CURLE_OK)
@@ -168,6 +185,7 @@ Document Client::send_request(string url, struct curl_slist * slist){
         /* always cleanup */ 
         curl_easy_cleanup(curl);
         curl_slist_free_all(slist);
+        free(mem.memory);
 
         return json;
     }

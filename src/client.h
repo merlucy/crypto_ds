@@ -19,14 +19,12 @@ class Client{
             //Add confirmation output
         };
 
-        rapidjson::Document get_account();
-        rapidjson::Document get_single_market(std::string market);
-        rapidjson::Document get_single_orderbook(std::string market, std::string depth);
-        rapidjson::Document get_trades(std::string market, std::string limit);
-        rapidjson::Document get_hist_specified(std::string market, std::string resolution, std::string limit, std::string start_time, std::string end_time);
-        rapidjson::Document get_hist_recent(std::string market, std::string resolution, std::string limit);
-
-        static size_t to_json(void * data, size_t size, size_t nmemb, void * doc);
+        rapidjson::Document* get_account();
+        rapidjson::Document* get_single_market(std::string market);
+        rapidjson::Document* get_single_orderbook(std::string market, std::string depth);
+        rapidjson::Document* get_trades(std::string market, std::string limit);
+        rapidjson::Document* get_hist_specified(std::string market, std::string resolution, std::string limit, std::string start_time, std::string end_time);
+        rapidjson::Document* get_hist_recent(std::string market, std::string resolution, std::string limit);
 
     private:
         std::string endpoint;
@@ -34,7 +32,17 @@ class Client{
         std::string secret;
         std::string endpoint_append(std::string path);
         struct curl_slist* set_header(struct curl_slist * slist, std::string path);
-        rapidjson::Document send_request(std::string url, struct curl_slist* slist);
+        static size_t write_response(void * data, size_t size, size_t nmemb, void * userp);
+        rapidjson::Document* send_request(std::string url, struct curl_slist* slist);
 };
+
+typedef struct _mem_struct
+{
+
+  char *memory;
+  size_t size;
+
+} mem_struct;
+
 
 #endif /* CLIENT_H */
