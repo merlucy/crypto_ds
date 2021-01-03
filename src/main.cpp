@@ -4,6 +4,7 @@
 #include <string>
 #include "client.h"
 #include "parser.h"
+#include "query.h"
 
 #include "rapidjson/document.h"
 #include "rapidjson/writer.h"
@@ -16,16 +17,10 @@ using namespace rapidjson;
 int main(){
 
     Client c = Client("https://ftx.com");
+    Query q = Query(&c);
 
-    //c.get_account();
-    //c.get_single_market("BTC/USD");
-    Document* doc = c.get_single_orderbook("BTC/USD", "20");
-
-    Parser p;
-    p.parse_orderbook(doc);
-
-    //c.get_trades("BTC/USD", "20");
-    c.get_hist_recent("BTC/USD", "300", "20");
+    //q.get_year_hist("BTC/USD");
+    q.get_hist_from("BTC/USD", "2020-01-01");
 
     return 0;
 }

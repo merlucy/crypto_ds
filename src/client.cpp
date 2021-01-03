@@ -65,7 +65,7 @@ struct curl_slist* Client::set_header(struct curl_slist * slist, string path){
     return slist;
 }
 
-Document* Client::get_account(){
+Document Client::get_account(){
 
     string path = "/api/account";
     string url = endpoint_append(path);
@@ -73,38 +73,38 @@ Document* Client::get_account(){
     struct curl_slist *slist = NULL;
     slist = set_header(slist, path);
     
-    Document* result = send_request(url, slist);
+    Document result = send_request(url, slist);
     
     return result;
 }
 
 // Get single market data. FTX does not require authentication
-Document* Client::get_single_market(string market){
+Document Client::get_single_market(string market){
 
     string path = "/api/markets/" + market;
     string url = endpoint_append(path);
 
     struct curl_slist *slist = NULL;
     
-    Document* result = send_request(url, slist);
+    Document result = send_request(url, slist);
     
     return result;
 }
 
 // Get single market orderbook. FTX does not require authentication
-Document* Client::get_single_orderbook(string market, string depth){
+Document Client::get_single_orderbook(string market, string depth){
 
     string path = "/api/markets/" + market + "/orderbook?depth=" + depth;
     string url = endpoint_append(path);
 
     struct curl_slist *slist = NULL;
     
-    Document* result = send_request(url, slist);
+    Document result = send_request(url, slist);
     
     return result;
 }
 
-Document* Client::get_trades(string market, string limit){
+Document Client::get_trades(string market, string limit){
 
     string path = "/api/markets/" + market + "/trades?limit=" + limit;
     string url = endpoint_append(path);
@@ -112,25 +112,37 @@ Document* Client::get_trades(string market, string limit){
     struct curl_slist *slist = NULL;
     slist = set_header(slist, path);
     
-    Document* result = send_request(url, slist);
+    Document result = send_request(url, slist);
     
     return result;
 }
 
-Document* Client::get_hist_specified(string market, string resolution, string limit, string start_time, string end_time){
+Document Client::get_hist_specified(string market, string resolution, string limit, string start_time, string end_time){
 
-    string path = "/api/markets/" + market + "/candles?resolution=" + resolution 
-        + "&limit=" + limit + "&start_time=" + start_time + "&end_time=" + end_time;
+    string path = "/api/markets/" + market + "/candles?resolution=" + resolution;
+
+    if(limit != ""){
+        path = path + "&limit=" + limit;
+    }
+
+    if(start_time != ""){
+        path = path + "&start_time=" + start_time;
+    }
+
+    if(end_time != ""){
+        path = path + "&end_time=" + end_time;
+    }
+
     string url = endpoint_append(path);
 
     struct curl_slist *slist = NULL;
     
-    Document* result = send_request(url, slist);
+    Document result = send_request(url, slist);
     
     return result;
 }
 
-Document* Client::get_hist_recent(string market, string resolution, string limit){
+Document Client::get_hist_recent(string market, string resolution, string limit){
 
     string path = "/api/markets/" + market + "/candles?resolution=" + resolution + "&limit=" + limit;
     string url = endpoint_append(path);
@@ -139,12 +151,12 @@ Document* Client::get_hist_recent(string market, string resolution, string limit
     struct curl_slist *slist = NULL;
     slist = set_header(slist, path);
     
-    Document* result = send_request(url, slist);
+    Document result = send_request(url, slist);
     
     return result;
 }
 
-Document* Client::send_request(string url, struct curl_slist * slist){
+Document Client::send_request(string url, struct curl_slist * slist){
 
     CURL *curl;
     CURLcode res;
@@ -159,7 +171,7 @@ Document* Client::send_request(string url, struct curl_slist * slist){
         curl_easy_setopt(curl, CURLOPT_URL, url.c_str());
         curl_easy_setopt(curl, CURLOPT_HTTPHEADER, slist);
 
-        Document* json = new Document();
+        Document doc;
 
         curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, write_response);
         curl_easy_setopt(curl, CURLOPT_WRITEDATA, (void *)&mem);
@@ -167,15 +179,15 @@ Document* Client::send_request(string url, struct curl_slist * slist){
         /* Perform the request, res will get the return code */ 
         res = curl_easy_perform(curl);
 
-        if(json->Parse((char *)mem.memory).HasParseError()){
+        if((&doc)->Parse((char *)mem.memory).HasParseError()){
             cout << "Parse Error" << endl;
             return NULL;
         };
 
-        StringBuffer buffer;
-        Writer<StringBuffer> writer(buffer);
-        json->Accept(writer);
-        cout << buffer.GetString() << endl;
+        // StringBuffer buffer;
+        // Writer<StringBuffer> writer(buffer);
+        // (&doc)->Accept(writer);
+        // cout << buffer.GetString() << endl;
 
         /* Check for errors */ 
         if(res != CURLE_OK)
@@ -187,7 +199,7 @@ Document* Client::send_request(string url, struct curl_slist * slist){
         curl_slist_free_all(slist);
         free(mem.memory);
 
-        return json;
+        return doc;
     }
     return NULL;
 }
