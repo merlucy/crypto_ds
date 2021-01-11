@@ -13,7 +13,6 @@ class Client{
 
             std::ifstream file;
             file.open("ftx_key.txt");
-
             file >> this->key >> this->secret;
             file.close();
             //Add confirmation output

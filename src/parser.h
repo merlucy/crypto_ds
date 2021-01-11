@@ -4,13 +4,18 @@
 #include "rapidjson/document.h"
 #include "rapidjson/writer.h"
 #include "rapidjson/stringbuffer.h"
+#include "d_struct.h"
+
+#include <vector>
 
 class Parser{
 
     public:
         // Take json as input, and populate db
-        int parse_orderbook(rapidjson::Document *doc);
-        int parse_historical(rapidjson::Document *doc);
+        int write_orderbook(rapidjson::Document *doc);
+        int write_historical(rapidjson::Document *doc);
+        int ser_orderbook(rapidjson::Document *doc, std::vector<hist_p> *v);
+        int ser_historical(rapidjson::Document *doc, std::vector<hist_p> *v);
 };
 
 #endif /* PARSER_H */

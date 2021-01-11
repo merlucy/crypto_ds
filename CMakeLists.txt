@@ -16,3 +16,9 @@ message("build type: " ${CMAKE_BUILD_TYPE})
 #set(OPENSSL_USE_STATIC_LIBS TRUE)
 find_package(OpenSSL REQUIRED)
 target_link_libraries(${PROJECT_NAME} OpenSSL::Crypto)
+
+# Specify the minimum version you require.
+find_package (mongoc-1.0 1.7 REQUIRED)
+
+# The "hello_mongoc.c" sample program is shared among four tests.
+target_link_libraries (${PROJECT_NAME} mongo::mongoc_static)

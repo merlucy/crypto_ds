@@ -2,6 +2,7 @@
 #include <iostream>
 #include <iomanip>
 #include <fstream>
+#include <vector>
 #include "rapidjson/document.h"
 #include "rapidjson/writer.h"
 #include "rapidjson/stringbuffer.h"
@@ -10,7 +11,7 @@
 using namespace rapidjson;
 using namespace std;
 
-int Parser::parse_orderbook(Document * doc){
+int Parser::write_orderbook(Document * doc){
 
     Value * result = Pointer("/result").Get(*doc);
 
@@ -22,7 +23,7 @@ int Parser::parse_orderbook(Document * doc){
     return 1;
 }
 
-int Parser::parse_historical(Document * doc){
+int Parser::write_historical(Document * doc){
 
     const Value& result = (*doc)["result"];
     assert(result.IsArray());
@@ -47,3 +48,44 @@ int Parser::parse_historical(Document * doc){
 
     return 1;
 }
+
+// int Parser::ser_orderbook(Document * doc, vector<hist_p> *v){
+//     return 1;
+// }
+
+/*  Serialize historical data points into hist structs
+*
+*/
+int Parser::ser_historical(Document * doc, vector<hist_p> *v){
+
+    const Value& result = (*doc)["result"];
+    assert(result.IsArray());
+
+    for(SizeType i = 0; i < result.Size(); i++){
+        const Value& element = result[i];
+        hist_p elem;
+
+        elem.close = element["close"].GetDouble();
+        elem.high = element["high"].GetDouble();
+        elem.low = element["low"].GetDouble();
+        elem.open = element["open"].GetDouble();
+        elem.startTime = element["startTime"].GetString();
+        elem.time = element["time"].GetDouble();
+        elem.volume = element["volume"].GetDouble();
+        v->push_back(elem);
+    }
+
+    for(vector<hist_p>::iterator itr = v->begin(); itr != v->end(); itr++){
+
+        cout << itr->close << " ";
+        cout << itr->high << " ";
+        cout << itr->low << " ";
+        cout << itr->open << " ";
+        cout << itr->startTime << " ";
+        cout << itr->time << " ";
+        cout << itr->volume << endl;
+    }
+
+    return 1;
+}
+

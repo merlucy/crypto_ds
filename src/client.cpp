@@ -184,11 +184,6 @@ Document Client::send_request(string url, struct curl_slist * slist){
             return NULL;
         };
 
-        // StringBuffer buffer;
-        // Writer<StringBuffer> writer(buffer);
-        // (&doc)->Accept(writer);
-        // cout << buffer.GetString() << endl;
-
         /* Check for errors */ 
         if(res != CURLE_OK)
         fprintf(stderr, "curl_easy_perform() failed: %s\n",
