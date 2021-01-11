@@ -14,7 +14,8 @@ C++ client-side program to interact with FTX.com api and populate MongoDB databa
 **Required Dependencies:**
 - Curl & libcurl library
 - [rapidjson](https://rapidjson.org/)
-- Mongodb
+- Running Mongodb instance
+- [libmongoc](http://mongoc.org/libmongoc/current/index.html)
 
 **2. Compile using CMake, and Run**
 Save the key and secret of FTX.com api in a two line file.
