@@ -14,6 +14,8 @@ class Database{
         bool check_db();
         bool insert_hist(std::string market, std::vector<hist_p> *v);
 
+        std::string check_latest(std::string market);
+        long get_latest(std::string market);
     private:
         mongoc_uri_t *uri;
         mongoc_client_t *client;

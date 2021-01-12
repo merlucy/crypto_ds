@@ -38,11 +38,11 @@ vector<hist_p> Query::get_year_hist(string market){
 
 // Get historical data from the start time specified in the interval of one day
 vector<hist_p> Query::get_hist_from(string market, string start_time){
-    string t = date_to_epoch(start_time);
     
-    Document doc = this->client->get_hist_specified(market, DAY, "", t, "");
+    long next_epoch = get_next_epoch(start_time, "new", stol(DAY));
+    Document doc = this->client->get_hist_specified(market, DAY, "", to_string(next_epoch), "");
+    
     Parser psr;
-
     vector<hist_p> v;
     psr.ser_historical(&doc, &v);
 
@@ -61,7 +61,24 @@ vector<hist_p> Query::get_hist_custom(string market, string start_time, string e
     vector<hist_p> v;
     psr.ser_historical(&doc, &v);
 
+    this->db->insert_hist(market, &v);
+
     return v;
+}
+
+long Query::get_next_epoch(string start_time, string market, long interval){
+
+    // Convert date to UNIX epoch and convert to type long
+    long specified_time = stol(date_to_epoch(start_time));
+
+    // Query the database to check the latest epoch time of the last element in the database for collection named market
+    long db_latest =  this->db->get_latest(market) / 1000
+
+    if(db_latest > specified_time){
+        return db_latest + interval;
+    }else{
+        return specified_time;
+    }
 }
 
 // TODO: Create methods for writing to file instead of writing to db and stdout

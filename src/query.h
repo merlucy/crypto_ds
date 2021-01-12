@@ -23,6 +23,7 @@ class Query{
     private:
         Client *client;
         Database *db;
+        long get_next_epoch(std::string start_time, std::string market, long interval);
 };
 
 #endif
