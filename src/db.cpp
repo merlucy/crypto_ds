@@ -97,7 +97,6 @@ bool Database::insert_hist(string market, vector<hist_p> *v){
     return true;
 }
 
-// Check the latest time stamp of the final data point inside the collection
 string Database::check_latest(string market){
     
     mongoc_collection_t *collection;
@@ -140,7 +139,7 @@ long Database::get_latest(string market){
     mongoc_collection_t *collection;
     collection = mongoc_client_get_collection(this->client, this->db_name, market.c_str());
 
-    long result;
+    long result = 0;
     bson_t *query;
     bson_t *update;
     const bson_t *doc;

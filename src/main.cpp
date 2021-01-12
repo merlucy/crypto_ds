@@ -25,8 +25,8 @@ int main(){
 
     Query q = Query(&c, &db);
 
-    //q.get_year_hist("BTC/USD");
-    q.get_hist_from("BTC/USD", "2020-01-01");
+    q.populate_db("BTC/USD", "2020-01-01");
+    q.populate_db("ETH/USD", "2020-01-01");
 
     return 0;
 }

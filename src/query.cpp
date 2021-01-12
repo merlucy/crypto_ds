@@ -6,6 +6,7 @@
 #include "rapidjson/writer.h"
 #include "rapidjson/stringbuffer.h"
 #include "util/time_conv.h"
+#include "util/str_conv.h"
 
 #define HOUR "3600"
 #define DAY "86400"
@@ -38,15 +39,18 @@ vector<hist_p> Query::get_year_hist(string market){
 
 // Get historical data from the start time specified in the interval of one day
 vector<hist_p> Query::get_hist_from(string market, string start_time){
-    
-    long next_epoch = get_next_epoch(start_time, "new", stol(DAY));
+
+    // When creating and fetching collections, we replace front slashed with underscore
+    string col_name = replace_char(market, string("/"), string("_"));
+    long next_epoch = get_next_epoch(start_time, col_name, stol(DAY));
+
     Document doc = this->client->get_hist_specified(market, DAY, "", to_string(next_epoch), "");
     
     Parser psr;
     vector<hist_p> v;
     psr.ser_historical(&doc, &v);
 
-    this->db->insert_hist("new", &v);
+    this->db->insert_hist(col_name, &v);
 
     return v;
 }
@@ -72,13 +76,21 @@ long Query::get_next_epoch(string start_time, string market, long interval){
     long specified_time = stol(date_to_epoch(start_time));
 
     // Query the database to check the latest epoch time of the last element in the database for collection named market
-    long db_latest =  this->db->get_latest(market) / 1000
+    long db_latest =  this->db->get_latest(market) / 1000;
 
     if(db_latest > specified_time){
         return db_latest + interval;
     }else{
         return specified_time;
     }
+}
+
+
+int Query::populate_db(string market, string start_time){
+
+    vector<hist_p> v = get_hist_from(market, start_time);
+
+    return 1;
 }
 
 // TODO: Create methods for writing to file instead of writing to db and stdout
