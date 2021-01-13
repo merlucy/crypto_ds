@@ -16,6 +16,7 @@ C++ client-side program to interact with FTX.com api and populate MongoDB databa
 - [rapidjson](https://rapidjson.org/)
 - Running Mongodb instance
 - [libmongoc](http://mongoc.org/libmongoc/current/index.html)
+- [zaphoyd/websocketpp](https://github.com/zaphoyd/websocketpp)
 
 **2. Compile using CMake, and Run**
 Save the key and secret of FTX.com api in a two line file.

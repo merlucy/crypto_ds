@@ -2,10 +2,9 @@
 #include <stdio.h>
 #include <ctime>
 #include <string>
-#include "client.h"
-#include "parser.h"
-#include "query.h"
-#include "db.h"
+#include "d_fetch/client.h"
+#include "d_fetch/query.h"
+#include "d_fetch/db.h"
 
 #include "rapidjson/document.h"
 #include "rapidjson/writer.h"
@@ -14,7 +13,6 @@
 
 using namespace std;
 using namespace rapidjson;
-
 
 int main(){
     

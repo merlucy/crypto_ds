@@ -5,11 +5,6 @@
 
 #include <iostream>
 
-// struct tm str_to_date(std::string time){
-//     struct tm tm_s;
-
-// }
-
 // Converts datetime in format "1970-01-01" to UNIX Epoch
 std::string date_to_epoch(std::string time){
     

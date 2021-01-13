@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.0)
 project(autot)
 set(CMAKE_CXX_FLAGS "-Wall -Werror -Wfatal-errors -Wpedantic -Wextra -Wmissing-include-dirs -Wconversion -Wsign-conversion -pthread")
 
-file(GLOB SOURCES src/*.h src/*.cpp)
+file(GLOB SOURCES src/*.h src/*.cpp src/d_fetch/*.h src/d_fetch/*.cpp)
 add_executable(${PROJECT_NAME} ${SOURCES})
 
 set(CURL_LIBRARY "-lcurl") 
