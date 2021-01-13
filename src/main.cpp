@@ -22,11 +22,11 @@ int main(){
     db.check_db();
 
     Client c = Client("https://ftx.com");
-
     Query q = Query(&c, &db);
 
     q.populate_db("BTC/USD", "2020-01-01");
     q.populate_db("ETH/USD", "2020-01-01");
+    q.get_from_db("ETH/USD", "2020-01-01");
 
     return 0;
 }

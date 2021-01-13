@@ -15,6 +15,7 @@ class Database{
         bool insert_hist(std::string market, std::vector<hist_p> *v);
 
         std::string check_latest(std::string market);
+        std::vector<hist_p> get_all_db_from(std::string market, long epoch);
         long get_latest(std::string market);
     private:
         mongoc_uri_t *uri;

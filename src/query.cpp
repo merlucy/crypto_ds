@@ -85,12 +85,19 @@ long Query::get_next_epoch(string start_time, string market, long interval){
     }
 }
 
-
 int Query::populate_db(string market, string start_time){
 
     vector<hist_p> v = get_hist_from(market, start_time);
 
     return 1;
+}
+
+vector<hist_p> Query::get_from_db(string market, string start_time){
+    
+    string col_name = replace_char(market, string("/"), string("_"));
+    vector<hist_p> v = this->db->get_all_db_from(col_name, stol(date_to_epoch(start_time)));
+
+    return v;
 }
 
 // TODO: Create methods for writing to file instead of writing to db and stdout

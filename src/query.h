@@ -19,6 +19,7 @@ class Query{
         std::vector<hist_p> get_year_hist(std::string market);
         std::vector<hist_p> get_hist_from(std::string market, std::string start_time);
         std::vector<hist_p> get_hist_custom(std::string market, std::string start_time, std::string end_time, std::string resolution, std::string limit);
+        std::vector<hist_p> get_from_db(std::string market, std::string start_time);
 
     private:
         Client *client;

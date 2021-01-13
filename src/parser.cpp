@@ -69,8 +69,8 @@ int Parser::ser_historical(Document * doc, vector<hist_p> *v){
         elem.high = element["high"].GetDouble();
         elem.low = element["low"].GetDouble();
         elem.open = element["open"].GetDouble();
-        elem.startTime = element["startTime"].GetString();
-        elem.time = element["time"].GetDouble();
+        elem.time = element["startTime"].GetString();
+        elem.epoch = element["time"].GetDouble();
         elem.volume = element["volume"].GetDouble();
         v->push_back(elem);
     }
@@ -81,8 +81,8 @@ int Parser::ser_historical(Document * doc, vector<hist_p> *v){
         cout << itr->high << " ";
         cout << itr->low << " ";
         cout << itr->open << " ";
-        cout << itr->startTime << " ";
         cout << itr->time << " ";
+        cout << itr->epoch << " ";
         cout << itr->volume << endl;
     }
 

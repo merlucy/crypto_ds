@@ -9,8 +9,8 @@ typedef struct _hist_p{
     double high;
     double low;
     double open;
-    std::string startTime;
-    double time;
+    std::string time;
+    double epoch;
     double volume;
 
 }hist_p;
