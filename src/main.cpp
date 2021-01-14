@@ -5,6 +5,7 @@
 #include "d_fetch/client.h"
 #include "d_fetch/query.h"
 #include "d_fetch/db.h"
+#include "d_fetch/client_ws.h"
 
 #include "rapidjson/document.h"
 #include "rapidjson/writer.h"
