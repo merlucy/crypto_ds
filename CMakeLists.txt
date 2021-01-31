@@ -1,4 +1,6 @@
 cmake_minimum_required(VERSION 3.0)
+set(CMAKE_CXX_STANDARD 11)
+
 project(autot)
 set(CMAKE_CXX_FLAGS "-Wall -Werror -Wfatal-errors -Wpedantic -Wextra -Wmissing-include-dirs -Wconversion -Wsign-conversion -pthread")
 
@@ -14,6 +16,9 @@ add_definitions(-DCURL_STATICLIB)
 message("build type: " ${CMAKE_BUILD_TYPE})
 
 #set(OPENSSL_USE_STATIC_LIBS TRUE)
+#configure for macos
+set(OPENSSL_ROOT_DIR /usr/local/opt/openssl@1.1)
+
 find_package(OpenSSL REQUIRED)
 target_link_libraries(${PROJECT_NAME} OpenSSL::Crypto)
 

@@ -1,0 +1,2 @@
+#Run the following to start mongod server
+mongod --config /usr/local/etc/mongod.conf
